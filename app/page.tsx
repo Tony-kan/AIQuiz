@@ -1,6 +1,10 @@
+"use client";
+import { useEffect } from "react";
 import { Zap, GraduationCap, BarChart3 } from "lucide-react";
 import Header from "@/components/Header";
 import HomeCard from "@/components/HomeCard";
+import { useSession } from "@/hooks/use-session";
+import { useRouter } from "next/navigation";
 
 const homepageFeatures = [
   {
@@ -25,6 +29,24 @@ const homepageFeatures = [
 ];
 
 export default function Home() {
+  const { session, loading } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading) {
+      if (session) {
+        const redirectPath =
+          session?.role === "Student" ? "/studentsDashboard" : "/dashboard";
+
+        router.push(redirectPath);
+      }
+    }
+  }, [session, loading, router]);
+
+  if (loading || session) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-black">
       <Header />

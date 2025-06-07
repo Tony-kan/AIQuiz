@@ -80,6 +80,9 @@ const Header = () => {
                 <DropdownMenuItem className="flex flex-col items-start">
                   <p className="text-sm font-medium">{session.fullname}</p>
                   <p className="text-xs text-gray-500">{session.email}</p>
+                  <p className="text-xs text-gray-500 capitalize">
+                    {session.role}
+                  </p>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
