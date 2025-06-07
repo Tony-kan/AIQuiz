@@ -3,7 +3,11 @@
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
+
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +34,8 @@ const formSchema = z.object({
 });
 
 const SignInForm = () => {
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,11 +44,40 @@ const SignInForm = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log("Form values:", values);
     console.log("Form submitted successfully!");
+    try {
+      const response = await axios.post("/api/auth/login", {
+        email: values.email,
+        password: values.password,
+      });
+      console.log(response);
+      // toast("Login successful!", {
+      //   description: `Welcome back, ${response.data}!`,
+      // });
+      toast.success("Login successful!", {
+        description: "Welcome back! Redirecting you now...",
+      });
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx.
+        // We can get the custom message from our API.
+        const errorMessage =
+          error.response.data.message || "An unexpected error occurred.";
+        toast.error(errorMessage);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        // or a non-Axios error was thrown.
+        toast.error("Registration failed. Please try again.");
+      }
+    }
   }
   return (
     <Form {...form}>

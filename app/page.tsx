@@ -2,7 +2,7 @@ import { Zap, GraduationCap, BarChart3 } from "lucide-react";
 import Header from "@/components/Header";
 import HomeCard from "@/components/HomeCard";
 
-export const homepageFeatures = [
+const homepageFeatures = [
   {
     icon: <Zap size={40} className="text-teal-500" />,
     label: "Fast Setup",

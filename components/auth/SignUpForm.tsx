@@ -4,8 +4,11 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Form,
   FormControl,
@@ -26,6 +29,9 @@ const formSchema = z
   .object({
     username: z.string().min(2, {
       message: "Username must be at least 2 characters.",
+    }),
+    fullname: z.string().min(2, {
+      message: "Full name must be at least 2 characters.",
     }),
     email: z.string().email({
       message: "Please enter a valid email address.",
@@ -53,10 +59,12 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 const SignUpForm = () => {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
+      fullname: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -64,17 +72,57 @@ const SignUpForm = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    console.log("Form values:", values);
-    console.log("Form submitted successfully!");
+    // console.log("Form values:", values);
+
+    try {
+      const response = await axios.post("/api/auth/register", {
+        username: values.username,
+        fullname: values.fullname,
+        email: values.email,
+        password: values.password,
+        role: values.role,
+      });
+      console.log(response);
+      console.log("Form submitted successfully!");
+      // alert("Registration successful! You can now sign in.");
+      // toast("Registration successful!", {
+      //   description: "You can now sign in.",
+      //   action: {
+      //     label: "Undo",
+      //     onClick: () => console.log("Undo"),
+      //   },
+      // });
+      toast("Registration successful!", {
+        description: "You can now sign in.",
+      });
+      router.push("/sign-in"); // Redirect to sign-in page after successful registration
+    } catch (error) {
+      console.error(error);
+      // toast.error(`Registration failed : ${error.message}`);
+
+      // --- THIS IS THE CORRECTED LOGIC ---
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx.
+        // We can get the custom message from our API.
+        const errorMessage =
+          error.response.data.message || "An unexpected error occurred.";
+        toast.error(errorMessage);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        // or a non-Axios error was thrown.
+        toast.error("Registration failed. Please try again.");
+      }
+    }
   }
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="min-w-[360px] mx-auto p-6 bg-white dark:bg-[#212121] rounded-lg shadow-md"
+        className="min-w-[360px] mx-auto px-6 bg-white dark:bg-[#212121] rounded-lg shadow-md"
       >
         <FormField
           control={form.control}
@@ -86,6 +134,19 @@ const SignUpForm = () => {
                 <Input placeholder="Enter unique username" {...field} />
               </FormControl>
 
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="fullname"
+          render={({ field }) => (
+            <FormItem className="mb-2">
+              <FormLabel>Fullname</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter your fullname" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -189,7 +250,7 @@ const SignUpForm = () => {
         >
           Submit
         </Button>
-        <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+        <div className="my-4 text-center text-sm text-gray-600 dark:text-gray-400">
           Already have an account?{" "}
           <Link
             href="/sign-in"
