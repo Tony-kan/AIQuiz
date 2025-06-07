@@ -1,23 +1,22 @@
 import { Zap, GraduationCap, BarChart3 } from "lucide-react";
-
 import Header from "@/components/Header";
 import HomeCard from "@/components/HomeCard";
 
-export const metadata = [
+export const homepageFeatures = [
   {
-    icon: <Zap size={40} className="text-teal-400" />,
+    icon: <Zap size={40} className="text-teal-500" />,
     label: "Fast Setup",
     title: "Instant Quiz Generation",
     description: "Generate quizzes in seconds with AI or build your own.",
   },
   {
-    icon: <GraduationCap size={40} className="text-teal-400" />,
+    icon: <GraduationCap size={40} className="text-teal-500" />,
     label: "For Everyone",
     title: "Admin & Student Roles",
     description: "Teachers manage quizzes,students take and review quizzes.",
   },
   {
-    icon: <BarChart3 size={40} className="text-teal-400" />,
+    icon: <BarChart3 size={40} className="text-teal-500" />,
 
     label: "Smart Feedback",
     title: "Detailed results",
@@ -53,7 +52,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {metadata.map((feature, index) => (
+            {homepageFeatures.map((feature, index) => (
               <HomeCard
                 key={index}
                 icon={feature.icon}
