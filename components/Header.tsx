@@ -28,7 +28,7 @@ const Header = () => {
           <Link href="/sign-in">
             <Button
               variant="outline"
-              className="font-bold text-teal-500 border-teal-500 hover:bg-teal-500/10 hover:text-teal-500"
+              className="font-bold text-teal-500 border-teal-500 hover:bg-teal-500/10 hover:text-teal-500 dark:border-teal-500 dark:hover:bg-teal-500/10"
             >
               Sign In
             </Button>

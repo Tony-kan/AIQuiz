@@ -74,7 +74,7 @@ const SignUpForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="min-w-[360px] mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md"
+        className="min-w-[360px] mx-auto p-6 bg-white dark:bg-[#212121] rounded-lg shadow-md"
       >
         <FormField
           control={form.control}
