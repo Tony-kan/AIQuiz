@@ -13,9 +13,7 @@ AIQuiz is a modern, full-stack web application built with Next.js that allows us
 
 ## Live Deployment
 
-🚀 **Check out the live version here:** [**Your Deployment Link Will Go Here**](https://aiquizze.netlify.app)
-
-_(Note: Replace the link above with your actual Vercel deployment URL once deployed.)_
+🚀 **Check out the live version here:** [**https://aiquizze.netlify.app**](https://aiquizze.netlify.app)
 
 ---
 
