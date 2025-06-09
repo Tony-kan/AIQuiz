@@ -31,7 +31,7 @@ export const QuestionList = ({
           <CardHeader className="flex flex-row items-start justify-between">
             <div>
               <CardTitle className="text-base font-semibold">
-                {index + 1}. {q.Questiontext}
+                {index + 1}. {q.questionText}
               </CardTitle>
             </div>
             <div className="flex gap-2">

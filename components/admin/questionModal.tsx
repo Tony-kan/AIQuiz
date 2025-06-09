@@ -203,7 +203,7 @@ export const QuestionModal = ({
         const options = [...questionData.options];
         while (options.length < 4) options.push("");
         setFormState({
-          questionText: questionData.Questiontext,
+          questionText: questionData.questionText,
           options: options,
           correctAnswerIndex: questionData.correctAnswerIndex ?? 0,
         });
@@ -247,8 +247,8 @@ export const QuestionModal = ({
     // POST (Create): Use static URL /api/admin/question (matches your backend)
     // PUT (Edit): Use dynamic URL /api/admin/question/[questionId] (standard REST)
     const apiUrl = isEditing
-      ? `/api/admin/quiz/question/${questionData._id}` // For PUT
-      : `/api/admin/quiz/question`; // For POST
+      ? `/api/admin/quiz/questions/${questionData._id}` // For PUT
+      : `/api/admin/quiz/questions`; // For POST
 
     const method = isEditing ? "PUT" : "POST";
 
@@ -259,6 +259,7 @@ export const QuestionModal = ({
       ? formState // Body for PUT
       : { ...formState, quizId: quizId }; // Body for POST <-- quizId included here
 
+      
     const saveToast = toast.loading(
       isEditing ? "Updating question..." : "Adding question..."
     );

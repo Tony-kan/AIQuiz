@@ -13,7 +13,7 @@ type StatData = {
 
 declare interface IQuestion {
   _id: string;
-  Questiontext: string;
+  questionText: string;
   options: string[];
   // correctAnswer: string;
   correctAnswerIndex: number;

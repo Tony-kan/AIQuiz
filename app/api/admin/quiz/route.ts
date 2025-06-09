@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/database";
 import QuizModel from "@/models/quiz";
+// import UserModel from "@/models/user";
 import { verifyAdmin } from "@/lib/auth";
 
 // POST: Create a new quiz
