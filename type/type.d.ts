@@ -4,3 +4,26 @@ export type FeatureInfo = {
   title: string;
   description: string;
 };
+
+type StatData = {
+  stat_label: string;
+  value: string;
+  description: string;
+};
+
+declare interface IQuestion {
+  _id: string;
+  text: string;
+  options: string[];
+  correctAnswer: string;
+}
+
+declare interface IQuiz {
+  _id: string;
+  title: string;
+  description: string;
+  topic: string;
+  passMark: number;
+  questions: IQuestion[];
+  createdAt: string;
+}

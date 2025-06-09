@@ -31,9 +31,11 @@ import {
 } from "@/components/ui/select";
 import { Library, Users, CheckCircle, Percent, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
+import { IQuiz, StatData } from "@/type/type";
+import { mockApiData } from "@/lib/Data";
+import { QuizList } from "@/components/admin/quizList";
 // import { Toaster } from "@/components/ui/sonner";
 
-// --- STATIC UI & MOCK DATA (No changes here) ---
 const cardUIData = [
   {
     stat_label: "totalQuizzes",
@@ -57,51 +59,6 @@ const cardUIData = [
   },
 ];
 
-const mockApiData = [
-  {
-    stat_label: "totalQuizzes",
-    value: "25",
-    description: "Total number of quizzes created",
-  },
-  {
-    stat_label: "activeStudents",
-    value: "1,254",
-    description: "+180 since last month",
-  },
-  {
-    stat_label: "totalSubmissions",
-    value: "8,430",
-    description: "Results awaiting review: 15",
-  },
-  {
-    stat_label: "averageScore",
-    value: "82%",
-    description: "Average passing rate across all quizzes",
-  },
-];
-
-type StatData = {
-  stat_label: string;
-  value: string;
-  description: string;
-};
-
-interface IQuestion {
-  _id: string;
-  text: string;
-  options: string[];
-  correctAnswer: string;
-}
-
-interface IQuiz {
-  _id: string;
-  title: string;
-  description: string;
-  topic: string;
-  questions: IQuestion[];
-  createdAt: string;
-}
-
 const tabTriggerStyles = `
   relative rounded-none border-b-2 border-transparent bg-transparent px-4 py-2 text-sm font-medium text-muted-foreground 
   transition-none focus-visible:ring-0
@@ -122,36 +79,10 @@ const Page = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [quizzes, setQuizzes] = useState<IQuiz[]>([]);
   const [isLoadingQuizzes, setIsLoadingQuizzes] = useState(true);
+  const [editingQuizId, setEditingQuizId] = useState<string | null>(null);
 
   console.log("quizzes:", quizzes);
   console.log("isLoadingQuizzes:", isLoadingQuizzes);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setStatsData(mockApiData);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setQuizDetails((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleTopicChange = (value: string) => {
-    setQuizDetails((prev) => ({ ...prev, topic: value }));
-  };
-
-  // const handleSaveQuiz = () => {
-  //   // TODO: Add form validation here (e.g., using Zod)
-  //   console.log("Saving new quiz:", quizDetails);
-  //   // TODO: Send data to your backend API
-
-  //   // Close the modal and reset the form
-  //   setIsModalOpen(false);
-  //   setQuizDetails(initialQuizState);
-  // };
 
   const fetchQuizzes = useCallback(async () => {
     setIsLoadingQuizzes(true);
@@ -168,32 +99,76 @@ const Page = () => {
     }
   }, []);
 
-  const handleCreateQuiz = async () => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setStatsData(mockApiData);
+      fetchQuizzes();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [fetchQuizzes]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setQuizDetails((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleTopicChange = (value: string) => {
+    setQuizDetails((prev) => ({ ...prev, topic: value }));
+  };
+
+  const handleSaveQuiz = async () => {
     if (!quizDetails.title || !quizDetails.topic) {
       return toast.error("Title and Topic are required.");
     }
     setIsSaving(true);
-    const creationToast = toast.loading("Creating new quiz...");
-    try {
-      const response = await fetch("/api/admin/quiz", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(quizDetails),
-      });
-      if (!response.ok) throw new Error("Failed to create quiz.");
 
-      toast.success("Quiz created successfully!", { id: creationToast });
+    const isEditing = !!editingQuizId;
+
+    const successMessage = isEditing
+      ? "Quiz updated successfully!"
+      : "Quiz created successfully!";
+    const errorMessage = isEditing
+      ? "Failed to update quiz."
+      : "Failed to create quiz.";
+
+    // const apiUrl = isEditing
+    //   ? `/api/admin/quiz/${editingQuizId}`
+    //   : "/api/admin/quiz";
+    const apiUrl = "/api/admin/quiz";
+    const apiMethod = isEditing ? "PUT" : "POST";
+
+    const bodyPayload = isEditing
+      ? { ...quizDetails, quizId: editingQuizId } // Add quizId to the body
+      : quizDetails;
+
+    // const saveToast = toast.loading(toastMessage);
+    const saveToast = toast.loading(
+      isEditing ? "Updating quiz..." : "Creating new quiz..."
+    );
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: apiMethod,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyPayload),
+      });
+      if (!response.ok) throw new Error(errorMessage);
+
+      toast.success(successMessage, { id: saveToast });
       setIsModalOpen(false);
-      setQuizDetails(initialQuizState);
       fetchQuizzes(); // Refresh the list
     } catch (error) {
-      // toast.error(error.message, { id: creationToast });
-      toast.error("Failed to create quiz.");
+      // toast.error(error.message || errorMessage, { id: saveToast });
+      toast.error(errorMessage);
       console.error("Error : ", error);
+      setIsSaving(false);
     } finally {
       setIsSaving(false);
     }
   };
+
   // const handleGenerateQuestions = async (quizId: string) => {
   //   const generationToast = toast.loading("Generating AI questions...");
   //   try {
@@ -221,65 +196,55 @@ const Page = () => {
   //   }
   // };
 
-  // const handleDeleteQuiz = async (quizId: string) => {
-  //   if (
-  //     !window.confirm(
-  //       "Are you sure? This will delete the quiz and all its questions permanently."
-  //     )
-  //   ) {
-  //     return;
-  //   }
-  //   const deleteToast = toast.loading("Deleting quiz...");
-  //   try {
-  //     const response = await fetch(`/api/admin/quiz/${quizId}`, {
-  //       method: "DELETE",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ quizId }),
-  //     });
-  //     if (!response.ok) throw new Error("Failed to delete quiz.");
+  const handleEditQuiz = (quiz: IQuiz) => {
+    setEditingQuizId(quiz._id);
+    setQuizDetails({
+      title: quiz.title,
+      description: quiz.description,
+      topic: quiz.topic,
+      passMark: quiz.passMark,
+    });
+    setIsModalOpen(true);
+  };
 
-  //     toast.success("Quiz deleted successfully!", { id: deleteToast });
-  //     fetchQuizzes(); // Refresh the list
-  //   } catch (error) {
-  //     // toast.error(error.message, { id: deleteToast });
-  //     toast.error("Failed to delete quiz.");
-  //     console.error("Error : ", error);
-  //   }
-  // };
+  const handleDeleteQuiz = async (quizId: string) => {
+    if (
+      !window.confirm(
+        "Are you sure? This will delete the quiz and all its questions permanently."
+      )
+    ) {
+      return;
+    }
+    const deleteToast = toast.loading("Deleting quiz...");
+    try {
+      const response = await fetch(`/api/admin/quiz/${quizId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quizId }),
+      });
+      if (!response.ok) throw new Error("Failed to delete quiz.");
+
+      toast.success("Quiz deleted successfully!", { id: deleteToast });
+      fetchQuizzes(); // Refresh the list
+    } catch (error) {
+      // toast.error(error.message, { id: deleteToast });
+      toast.error("Failed to delete quiz.");
+      console.error("Error : ", error);
+    }
+  };
+
+  const handleModalOpenChange = (isOpen: boolean) => {
+    setIsModalOpen(isOpen);
+    if (!isOpen) {
+      // Reset state when modal closes
+      setQuizDetails(initialQuizState);
+      setEditingQuizId(null);
+    }
+  };
 
   if (statsData.length === 0) {
     return <div className="p-10">Loading dashboard data...</div>;
   }
-
-  // const handleGenerateQuestions = async (quizId: string) => {
-  //   const generationToast = toast.loading("Generating AI questions...");
-  //   try {
-  //     // The URL path still helps organize routes, but the ID is sent in the body.
-  //     const response = await fetch(
-  //       `/api/admin/quiz/${quizId}/generate-questions`,
-  //       {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         // --- THE FIX: Include quizId in the JSON body ---
-  //         body: JSON.stringify({
-  //           quizId: quizId,
-  //           numberOfQuestions: 10,
-  //         }),
-  //       }
-  //     );
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.message || "Failed to generate questions.");
-  //     }
-
-  //     const result = await response.json();
-  //     toast.success(result.message, { id: generationToast });
-  //     fetchQuizzes(); // Refresh the list to show the new question count
-  //   } catch (error: any) {
-  //     toast.error(error.message, { id: generationToast });
-  //   }
-  // };
 
   return (
     <>
@@ -329,7 +294,7 @@ const Page = () => {
                 Handle quizzes, students, and review submissions.
               </CardDescription>
             </div>
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <Dialog open={isModalOpen} onOpenChange={handleModalOpenChange}>
               <DialogTrigger asChild>
                 <Button className="flex items-center font-bold bg-white dark:bg-transparent dark:hover:bg-teal-500 text-teal-500 border-2 border-teal-500 hover:bg-teal-600 hover:text-white">
                   <PlusCircle className="mr-2 h-4 w-4" /> Create Quiz
@@ -340,10 +305,14 @@ const Page = () => {
                 onInteractOutside={(e) => e.preventDefault()}
               >
                 <DialogHeader>
-                  <DialogTitle>Create a New Quiz</DialogTitle>
+                  <DialogTitle>
+                    {editingQuizId ? "Edit Quiz" : "Create a New Quiz"}
+                  </DialogTitle>
+
                   <DialogDescription>
-                    Fill in the details below to create a new quiz. Click save
-                    when youre done.
+                    {editingQuizId
+                      ? "Update the details below. Click save when you're done."
+                      : "Fill in the details below to create a new quiz. Click save when you're done."}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -418,7 +387,7 @@ const Page = () => {
                   <Button
                     className="bg-white dark:bg-transparent dark:hover:bg-teal-500 font-bold text-teal-500 border-2 border-teal-500 hover:bg-teal-600 hover:text-white"
                     type="submit"
-                    onClick={handleCreateQuiz}
+                    onClick={handleSaveQuiz}
                   >
                     {isSaving ? "Saving..." : "Save Quiz"}
                   </Button>
@@ -440,9 +409,12 @@ const Page = () => {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="quizzes" className="mt-4">
-                <p className="text-center text-muted-foreground p-8">
-                  A table of all quizzes will be displayed here.
-                </p>
+                <QuizList
+                  quizzes={quizzes}
+                  isLoading={isLoadingQuizzes}
+                  handleEdit={handleEditQuiz}
+                  handleDelete={handleDeleteQuiz}
+                />
               </TabsContent>
               <TabsContent value="students" className="mt-4">
                 <p className="text-center text-muted-foreground p-8">

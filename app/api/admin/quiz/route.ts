@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   if (!admin) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
-//   console.log("Decoded admin payload:", admin);
+  //   console.log("Decoded admin payload:", admin);
   try {
     await connectToDatabase();
     const body = await req.json();
