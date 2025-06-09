@@ -39,6 +39,7 @@ export async function POST(req: Request) {
       email: existingUser.email,
       role: existingUser.role,
       fullname: existingUser.fullname,
+      sub: existingUser._id.toString(),
     })
       .setProtectedHeader({ alg: "HS256" }) // Set the algorithm
       .setIssuedAt() // Set the issued at time to now
