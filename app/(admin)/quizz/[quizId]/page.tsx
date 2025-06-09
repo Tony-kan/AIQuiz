@@ -202,8 +202,10 @@ import { AiGenerationDialog } from "@/components/admin/aiGenerationDialog";
 const QuizAdminPage = () => {
   // Get the params object using the hook.
   // The key 'id' must match your folder name: [id]
-  const params = useParams<{ id: string }>();
-  const quizId = params.id;
+  // const params = useParams<{ quizId: string }>();
+  // const quizId = params.id;
+  const params = useParams<{ quizId: string }>();
+  const quizId = params.quizId;
 
   // The rest of your code is already correct for a Client Component.
   const [quiz, setQuiz] = useState<IQuiz | null>(null);
@@ -222,13 +224,8 @@ const QuizAdminPage = () => {
     // Set loading to true at the start of the fetch
     setIsLoading(true);
     try {
-      const quizRes = await fetch(`/api/admin/quiz/${quizId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ quizId }),
-      });
+      const quizRes = await fetch(`/api/admin/quiz/${quizId}`);
+      console.log("quizRes ----------- ", quizRes);
       if (!quizRes.ok) {
         const errorData = await quizRes.json();
         throw new Error(errorData.message || "Failed to fetch quiz details.");
@@ -236,13 +233,9 @@ const QuizAdminPage = () => {
       const quizData = await quizRes.json();
       setQuiz(quizData);
 
-      const questionsRes = await fetch(`/api/admin/quiz/questions`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ quizId }),
-      });
+      const questionsRes = await fetch(`/api/admin/quiz/${quizId}/questions`);
+      console.log("questtions Res ----------- ", questionsRes);
+
       if (!questionsRes.ok) {
         const errorData = await questionsRes.json();
         throw new Error(errorData.message || "Failed to fetch questions.");
@@ -288,9 +281,13 @@ const QuizAdminPage = () => {
 
     const deleteToast = toast.loading("Deleting question...");
     try {
-      const response = await fetch(`/api/admin/question/${questionId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/admin/quiz/${quizId}/question/${questionId}`,
+        {
+          method: "DELETE",
+          
+        }
+      );
       if (!response.ok) throw new Error("Failed to delete question.");
 
       toast.success("Question deleted successfully.", { id: deleteToast });
