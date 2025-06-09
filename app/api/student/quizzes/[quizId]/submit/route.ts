@@ -1,22 +1,29 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import QuizModel from "@/models/quiz";
 // import QuestionModel from "@/models/question";
 import QuizAttemptModel from "@/models/quizAttempt";
 import { connectToDatabase } from "@/lib/database";
 // import { IQuestion } from "@/models/question";
-
-// const MOCK_USER_ID = "65a5a8a5a5a5a5a5a5a5a5a5"; // Replace with a real ObjectId from your User collection
+import { verifyAdmin } from "@/lib/auth";
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { quizId: string } }
 ) {
   try {
+    const tokenData = await verifyAdmin(request);
+    if (!tokenData || !tokenData.userId) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     await connectToDatabase();
     const { quizId } = params;
     const body = await request.json();
-    const { userAnswers, userId } = body; // Expects: { questionId: string, selectedAnswerIndex: number }[]
+    const { userAnswers, userId } = body;
 
+    // Expects: { questionId: string, selectedAnswerIndex: number }[]
+    console.log("userAnswers:", userAnswers);
+    console.log("userId:;;;;;;;--------------", userId);
     // 1. Fetch the quiz and its questions WITH the correct answers
     const quiz = await QuizModel.findById(quizId).populate("questions");
     if (!quiz) {
@@ -45,7 +52,7 @@ export async function POST(
 
     // 4. Save the attempt
     const newAttempt = new QuizAttemptModel({
-      userId: userId,
+      userId: tokenData.userId,
       quizId,
       score,
       passed,
