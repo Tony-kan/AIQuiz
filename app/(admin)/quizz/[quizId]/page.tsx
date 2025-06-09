@@ -186,7 +186,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 // STEP 2: Import and use the `useParams` hook to get the ID.
-// import { useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { IQuiz, IQuestion } from "@/type/type";
 
@@ -199,15 +199,16 @@ import { QuestionModal } from "@/components/admin/questionModal";
 import { AiGenerationDialog } from "@/components/admin/aiGenerationDialog";
 
 // STEP 3: The component does NOT receive `params` as a prop.
-const QuizAdminPage = ({ params }: { params: { quizId: string } }) => {
+const QuizAdminPage = () => {
   // Get the params object using the hook.
   // The key 'id' must match your folder name: [id]
   // const params = useParams<{ quizId: string }>();
   // const quizId = params.id;
-  // const params = useParams<{ quizId: string }>();
-  // const quizId = params.quizId;
-  const { quizId } = params;
+  const params = useParams<{ quizId: string }>();
+  const quizId = params.quizId;
+
   console.log("FRONTEND: The quizId from the URL is:", quizId);
+
   // The rest of your code is already correct for a Client Component.
   const [quiz, setQuiz] = useState<IQuiz | null>(null);
   const [questions, setQuestions] = useState<IQuestion[]>([]);
@@ -315,7 +316,7 @@ const QuizAdminPage = ({ params }: { params: { quizId: string } }) => {
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" asChild>
-            <Link href="/admin/dashboard">
+            <Link href="/dashboard">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
