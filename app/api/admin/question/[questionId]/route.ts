@@ -58,7 +58,7 @@ import mongoose from "mongoose";
 // DELETE: Delete a specific question by its ID
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { questionId: string } }
+  context: { params: { questionId: string } }
 ) {
   const admin = await verifyAdmin(req);
   if (!admin) {
@@ -67,7 +67,8 @@ export async function DELETE(
 
   try {
     await connectToDatabase();
-    const { questionId } = params;
+    // const { questionId } = params;
+    const { questionId } = context.params;
 
     if (!mongoose.Types.ObjectId.isValid(questionId)) {
       return NextResponse.json(
