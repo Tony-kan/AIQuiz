@@ -1,53 +1,12 @@
+// File: app/api/admin/question/[questionId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/database";
-import QuizModel from "@/models/quiz";
 import QuestionModel from "@/models/question";
+import QuizModel from "@/models/quiz";
 import { verifyAdmin } from "@/lib/auth";
 import mongoose from "mongoose";
 
-// We have removed the second 'context' argument.
-export async function POST(req: NextRequest) {
-  const admin = await verifyAdmin(req);
-  if (!admin) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
-  try {
-    await connectToDatabase();
-
-    // --- THE FIX: Get quizId from the request BODY ---
-    const body = await req.json();
-    const { quizId, ...questionData } = body; // Separate quizId from the rest of the question data
-
-    if (!quizId) {
-      return NextResponse.json(
-        { message: "quizId is missing from the request body." },
-        { status: 400 }
-      );
-    }
-
-    // Create the new question with the remaining data and the extracted quizId
-    const newQuestion = new QuestionModel({
-      ...questionData,
-      quizId: quizId,
-    });
-    await newQuestion.save();
-
-    // Add the new question's ID to the quiz's questions array
-    await QuizModel.findByIdAndUpdate(quizId, {
-      $push: { questions: newQuestion._id },
-    });
-
-    return NextResponse.json(newQuestion, { status: 201 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-}
-
+// PUT: Update a specific question by its ID
 export async function PUT(
   req: NextRequest,
   { params }: { params: { questionId: string } }
@@ -59,8 +18,11 @@ export async function PUT(
 
   try {
     await connectToDatabase();
+    // FIX: Only 'questionId' is available in params for this route.
+
+    const updateData = await req.json();
+
     const { questionId } = params;
-    const updateData = await req.json(); // The body contains the fields to update
 
     if (!mongoose.Types.ObjectId.isValid(questionId)) {
       return NextResponse.json(
@@ -69,12 +31,10 @@ export async function PUT(
       );
     }
 
-    // Find the question by its ID and update it with the new data
-    // { new: true } ensures the updated document is returned
     const updatedQuestion = await QuestionModel.findByIdAndUpdate(
       questionId,
       updateData,
-      { new: true, runValidators: true } // runValidators ensures the update follows schema rules
+      { new: true, runValidators: true }
     );
 
     if (!updatedQuestion) {
@@ -87,12 +47,7 @@ export async function PUT(
     return NextResponse.json(updatedQuestion, { status: 200 });
   } catch (error) {
     console.error("[UPDATE_QUESTION]", error);
-    // if (error.name === "ValidationError") {
-    //   return NextResponse.json(
-    //     { message: "Validation Error", details: error.errors },
-    //     { status: 400 }
-    //   );
-    // }
+
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }
@@ -121,8 +76,6 @@ export async function DELETE(
       );
     }
 
-    // Find and delete the question. We need the deleted document
-    // to get its quizId for the next step.
     const deletedQuestion = await QuestionModel.findByIdAndDelete(questionId);
 
     if (!deletedQuestion) {
@@ -132,8 +85,7 @@ export async function DELETE(
       );
     }
 
-    // IMPORTANT: Also remove the question's ID from the parent quiz's 'questions' array
-    // This maintains data integrity.
+    // This cleanup step is correct and very important.
     await QuizModel.findByIdAndUpdate(deletedQuestion.quizId, {
       $pull: { questions: deletedQuestion._id },
     });

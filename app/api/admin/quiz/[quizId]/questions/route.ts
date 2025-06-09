@@ -96,105 +96,105 @@ export async function POST(
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { questionId: string } }
-) {
-  const admin = await verifyAdmin(req);
-  if (!admin) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
+// export async function PUT(
+//   req: NextRequest,
+//   { params }: { params: { questionId: string } }
+// ) {
+//   const admin = await verifyAdmin(req);
+//   if (!admin) {
+//     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+//   }
 
-  try {
-    await connectToDatabase();
-    const { questionId } = params;
-    const updateData = await req.json(); // The body contains the fields to update
+//   try {
+//     await connectToDatabase();
+//     const { questionId } = params;
+//     const updateData = await req.json(); // The body contains the fields to update
 
-    if (!mongoose.Types.ObjectId.isValid(questionId)) {
-      return NextResponse.json(
-        { message: "Invalid Question ID" },
-        { status: 400 }
-      );
-    }
+//     if (!mongoose.Types.ObjectId.isValid(questionId)) {
+//       return NextResponse.json(
+//         { message: "Invalid Question ID" },
+//         { status: 400 }
+//       );
+//     }
 
-    // Find the question by its ID and update it with the new data
-    // { new: true } ensures the updated document is returned
-    const updatedQuestion = await QuestionModel.findByIdAndUpdate(
-      questionId,
-      updateData,
-      { new: true, runValidators: true } // runValidators ensures the update follows schema rules
-    );
+//     // Find the question by its ID and update it with the new data
+//     // { new: true } ensures the updated document is returned
+//     const updatedQuestion = await QuestionModel.findByIdAndUpdate(
+//       questionId,
+//       updateData,
+//       { new: true, runValidators: true } // runValidators ensures the update follows schema rules
+//     );
 
-    if (!updatedQuestion) {
-      return NextResponse.json(
-        { message: "Question not found" },
-        { status: 404 }
-      );
-    }
+//     if (!updatedQuestion) {
+//       return NextResponse.json(
+//         { message: "Question not found" },
+//         { status: 404 }
+//       );
+//     }
 
-    return NextResponse.json(updatedQuestion, { status: 200 });
-  } catch (error) {
-    console.error("[UPDATE_QUESTION]", error);
-    // if (error.name === "ValidationError") {
-    //   return NextResponse.json(
-    //     { message: "Validation Error", details: error.errors },
-    //     { status: 400 }
-    //   );
-    // }
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json(updatedQuestion, { status: 200 });
+//   } catch (error) {
+//     console.error("[UPDATE_QUESTION]", error);
+//     // if (error.name === "ValidationError") {
+//     //   return NextResponse.json(
+//     //     { message: "Validation Error", details: error.errors },
+//     //     { status: 400 }
+//     //   );
+//     // }
+//     return NextResponse.json(
+//       { message: "Internal Server Error" },
+//       { status: 500 }
+//     );
+//   }
+// }
 
-// DELETE: Delete a specific question by its ID
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { questionId: string } }
-) {
-  const admin = await verifyAdmin(req);
-  if (!admin) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
+// // DELETE: Delete a specific question by its ID
+// export async function DELETE(
+//   req: NextRequest,
+//   { params }: { params: { questionId: string } }
+// ) {
+//   const admin = await verifyAdmin(req);
+//   if (!admin) {
+//     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+//   }
 
-  try {
-    await connectToDatabase();
-    const { questionId } = params;
+//   try {
+//     await connectToDatabase();
+//     const { questionId } = params;
 
-    if (!mongoose.Types.ObjectId.isValid(questionId)) {
-      return NextResponse.json(
-        { message: "Invalid Question ID" },
-        { status: 400 }
-      );
-    }
+//     if (!mongoose.Types.ObjectId.isValid(questionId)) {
+//       return NextResponse.json(
+//         { message: "Invalid Question ID" },
+//         { status: 400 }
+//       );
+//     }
 
-    // Find and delete the question. We need the deleted document
-    // to get its quizId for the next step.
-    const deletedQuestion = await QuestionModel.findByIdAndDelete(questionId);
+//     // Find and delete the question. We need the deleted document
+//     // to get its quizId for the next step.
+//     const deletedQuestion = await QuestionModel.findByIdAndDelete(questionId);
 
-    if (!deletedQuestion) {
-      return NextResponse.json(
-        { message: "Question not found" },
-        { status: 404 }
-      );
-    }
+//     if (!deletedQuestion) {
+//       return NextResponse.json(
+//         { message: "Question not found" },
+//         { status: 404 }
+//       );
+//     }
 
-    // IMPORTANT: Also remove the question's ID from the parent quiz's 'questions' array
-    // This maintains data integrity.
-    await QuizModel.findByIdAndUpdate(deletedQuestion.quizId, {
-      $pull: { questions: deletedQuestion._id },
-    });
+//     // IMPORTANT: Also remove the question's ID from the parent quiz's 'questions' array
+//     // This maintains data integrity.
+//     await QuizModel.findByIdAndUpdate(deletedQuestion.quizId, {
+//       $pull: { questions: deletedQuestion._id },
+//     });
 
-    return NextResponse.json(
-      { message: "Question deleted successfully" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("[DELETE_QUESTION]", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json(
+//       { message: "Question deleted successfully" },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     console.error("[DELETE_QUESTION]", error);
+//     return NextResponse.json(
+//       { message: "Internal Server Error" },
+//       { status: 500 }
+//     );
+//   }
+// }

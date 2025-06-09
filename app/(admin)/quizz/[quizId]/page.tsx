@@ -281,13 +281,9 @@ const QuizAdminPage = () => {
 
     const deleteToast = toast.loading("Deleting question...");
     try {
-      const response = await fetch(
-        `/api/admin/quiz/${quizId}/question/${questionId}`,
-        {
-          method: "DELETE",
-          
-        }
-      );
+      const response = await fetch(`/api/admin/question/${questionId}`, {
+        method: "DELETE",
+      });
       if (!response.ok) throw new Error("Failed to delete question.");
 
       toast.success("Question deleted successfully.", { id: deleteToast });
