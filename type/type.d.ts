@@ -13,9 +13,10 @@ type StatData = {
 
 declare interface IQuestion {
   _id: string;
-  text: string;
+  Questiontext: string;
   options: string[];
-  correctAnswer: string;
+  // correctAnswer: string;
+  correctAnswerIndex: number;
 }
 
 declare interface IQuiz {

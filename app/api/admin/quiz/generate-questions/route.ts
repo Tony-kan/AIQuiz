@@ -174,6 +174,7 @@ export async function POST(req: NextRequest) {
         "text": "The question text",
         "options": ["Option A", "Option B", "Option C", "Option D"],
         "correctAnswer": "The correct option text"
+        "correctAnswerIndex": "The index of the correct option"
       }
     `;
 
