@@ -186,7 +186,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 // STEP 2: Import and use the `useParams` hook to get the ID.
-import { useParams } from "next/navigation";
+// import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { IQuiz, IQuestion } from "@/type/type";
 
@@ -199,14 +199,15 @@ import { QuestionModal } from "@/components/admin/questionModal";
 import { AiGenerationDialog } from "@/components/admin/aiGenerationDialog";
 
 // STEP 3: The component does NOT receive `params` as a prop.
-const QuizAdminPage = () => {
+const QuizAdminPage = ({ params }: { params: { quizId: string } }) => {
   // Get the params object using the hook.
   // The key 'id' must match your folder name: [id]
   // const params = useParams<{ quizId: string }>();
   // const quizId = params.id;
-  const params = useParams<{ quizId: string }>();
-  const quizId = params.quizId;
-
+  // const params = useParams<{ quizId: string }>();
+  // const quizId = params.quizId;
+  const { quizId } = params;
+  console.log("FRONTEND: The quizId from the URL is:", quizId);
   // The rest of your code is already correct for a Client Component.
   const [quiz, setQuiz] = useState<IQuiz | null>(null);
   const [questions, setQuestions] = useState<IQuestion[]>([]);

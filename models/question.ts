@@ -26,14 +26,6 @@ const questionSchema = new Schema<IQuestion>(
       type: Number,
       required: true,
       // Add a validator to ensure the index is valid for the options array
-      validate: {
-        validator: function (this: IQuestion, value: number) {
-          // 'this' refers to the document being validated
-          return value >= 0 && value < this.options.length;
-        },
-        message:
-          "correctAnswerIndex must be a valid index for the options array.",
-      },
     },
     quizId: { type: Schema.Types.ObjectId, ref: "Quiz", required: true },
   },

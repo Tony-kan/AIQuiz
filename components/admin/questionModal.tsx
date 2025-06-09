@@ -247,7 +247,7 @@ export const QuestionModal = ({
     // POST (Create): Use static URL /api/admin/question (matches your backend)
     // PUT (Edit): Use dynamic URL /api/admin/question/[questionId] (standard REST)
     const apiUrl = isEditing
-      ? `/api/admin/question/${questionData._id}` // For PUT
+      ? `/api/admin/question/${questionData._id}/update` // For PUT
       : `/api/admin/quiz/questions`; // For POST
 
     const method = isEditing ? "PUT" : "POST";
