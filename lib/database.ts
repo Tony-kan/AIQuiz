@@ -1,7 +1,7 @@
 import mongoose, { Mongoose } from "mongoose";
 
 const MONGO_URI = process.env.MONGO_URI;
-console.log("MONGO_URI:", MONGO_URI); // Debugging line to check the URI
+// console.log("MONGO_URI:", MONGO_URI); // Debugging line to check the URI
 
 if (!MONGO_URI) {
   throw new Error(
