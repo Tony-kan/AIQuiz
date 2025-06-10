@@ -138,7 +138,7 @@ const QuizPage = () => {
     return <div className="text-center p-8">Quiz data is not available.</div>;
 
   return (
-    <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen">
+    <div className="container mx-auto p-4 flex flex-col items-center justify-center h-[calc(100vh-18vh)]">
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <div className="flex justify-between items-center">
