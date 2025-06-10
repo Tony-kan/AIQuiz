@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-// import { StatCard } from "@/components/ui/StatCard";
-// import { QuizCard } from "@/components/student/QuizCard";
+
 import {
   // BookCheck,
   BookCopy,
